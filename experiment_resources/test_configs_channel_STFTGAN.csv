@@ -1,0 +1,7 @@
+data_set,model_type,nperseg
+channel_sets/512fft_AWGN,stftgan,512
+channel_sets/512fft_EPA5Hz,stftgan,512
+channel_sets/512fft_ETU70Hz,stftgan,512
+channel_sets/512fft_ETU300Hz,stftgan,512
+channel_sets/512fft_EVA5Hz,stftgan,512,
+channel_sets/512fft_EVA70Hz,stftgan,512

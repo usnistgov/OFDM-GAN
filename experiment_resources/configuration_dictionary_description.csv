@@ -1,0 +1,34 @@
+Attribute Name,Parent Attribute,Description,Default Value
+save_model,,Save model wieghts and training metadata to "./model_results",True
+eval_model,,Evaluate model generated distribution and save to "./model_results",True
+num_gpus,,Number of GPUs used for performing GAN training procedure ,2
+start_gpu,,Start GPU device index,0
+checkpoint,,Train GAN starting from checkpoint path,None
+epochs,,Number of GAN training epochs,500
+D_updates,,Number of Discriminator updates to every 1 Generator updates,1
+latent_type,,Type of distribution from which latent vectors are passed as input to the generator,uniform
+model_levels,,Number of Discriminator and Generator convolutional layers,5
+num_channels,,Number of waveform channels in target distribution,2
+weight_init,,Weight initialization method,kaiming_normal
+stride,,Convolutional stride factor,2
+kernel_size,,Maximum 1D convolutional kernel length,4
+progressive_kernels,,Define uniform kernel lengths across layers (standard) or progressively scaled kernels (kernel),False
+model_type,,Specifies which model architecture to train: WaveGAN/PSKGAN/STFTGAN (overrides other default config parameters to implement each model),stftgan
+phase_shuffle,,Apply phase-shuffle to WaveGAN Discriminator architecture,False
+dataloader_specs,,Attributes passed to initialize Data_Loader object,
+batch_size,dataloader_specs,Number of samples per training batch,64
+dataset_specs,dataloader_specs,Dataset related attributes,
+data_scaler,dataset_specs,Data-scaling setting,global_min_max
+data_set,dataset_specs,path to target distribution training dataset,allocation_sets/mod16_iq_random_cp_long_128fft_rblocks1_subs36_evm-25
+num_samples,dataset_specs,number of samples in training set,None
+pad_signal,dataset_specs,length to zero-pad target distribution singals (used for STFTGAN and WaveGAN),None
+stft,dataset_specs,Use STFTGAN and transform distribution to STFT representation,False
+nperseg,dataset_specs,STFT FFT window length,0
+fft_shift,dataset_specs,Shift STFTs to have zero-frequency components,False
+optim_params,,Pytorch Optimizer attributes,
+D,optim_params,Discriminator optimizer attributes,
+lr,D,Discriminator learning rate,0.0001
+betas,D,Discriminator optimizer momentum beta settings,(0.0 0.9)
+G,optim_params,Generator optimizer attributes,
+lr,G,Generator learning rate,0.0001
+betas,G,Generator optimizer momentum beta settings,(0.0 0.9)

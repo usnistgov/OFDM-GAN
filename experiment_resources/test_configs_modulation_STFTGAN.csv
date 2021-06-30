@@ -1,0 +1,4 @@
+data_set,model_type,nperseg
+mod_order_sets/mod4_iq_random_cp_long_128fft_symbol6_subs36_evm-25,stftgan,128
+mod_order_sets/mod32_iq_random_cp_long_128fft_symbol6_subs36_evm-25,stftgan,128
+mod_order_sets/mod64_iq_random_cp_long_128fft_symbol6_subs36_evm-25,stftgan,128
