@@ -11,14 +11,13 @@ using the Pytorch library. This repository contains files for initializing the e
 supporting modules for target dataset creation, and model evaluation. The `models/` directory contains modules that create **PSK-GAN**, **STFT-GAN**,
 and **WaveGAN** architectures.
 
-Running `main.py` runs the default GAN configuration specified by the configuration dictionary `./experiment_resources/training_specs_dict.py`.
-Descriptions for the fields specified in `./experiment_resources/training_specs_dict.py` are located in 
-`./experiment_resources/configuration_dictionary_description.csv`. Additionally, a set of model configurations can be run in an automated fashion 
+Running `main.py` runs the default GAN configuration specified by the configuration dictionary `/experiment_resources/training_specs_dict.py`.
+Descriptions for the fields specified in `/experiment_resources/training_specs_dict.py` are located in 
+`/experiment_resources/configuration_dictionary_description.csv`. Additionally, a set of model configurations can be run in an automated fashion 
 by passing a configuration table (csv file) as an argument to the main python module (ex. `main.py --configs path_to_config_table.csv`). Column labels
 of a configuration table should correspond to desired keys in the GAN configuration dictionary that are to be changed across runs. 
 
-The training and test target datasets used in this study were synthesized using the script 
-`scripts/target_data_synth.py` and are provided in a separate gzip file, `target_distributions.tar.gz`.  To execute experiments, first unzip this file and place its contents in a subdirectory named `Data/`.  When running the models, experimental results are saved in `experiment_results/`, which is divided into sub-folders corresponding to each experiment. Each experiment folder contains sub-folders with results from three trials of each test configuration.  Each test-trial folder contains saved GAN models, training metadata, as well as evaluations of the generated distributions.  Previously-computed experimental results are saved in `experiment_results.tar.gz`
+The training and test target datasets used in this study were synthesized using the script `scripts/target_data_synth.py` and are provided in a separate gzip file, `target_distributions.tar.gz`, available for download at https://doi.org/10.18434/mds2-2428.  To execute experiments, first unzip this file and place its contents in a subdirectory named `Data/`.  When running the models, experimental results are saved in `experiment_results/`, which is divided into sub-folders corresponding to each experiment. Each experiment folder contains sub-folders with results from three trials of each test configuration. 
 
 ## <u>Requirements</u>
 We use a `conda` virtual environment to manage the project library dependencies.
