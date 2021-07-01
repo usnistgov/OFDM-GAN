@@ -310,6 +310,12 @@ def evaluate_spectrum_distance(targ_spectrums, gen_spectrums, subinds, fft):
     gen_spectrums = np.array(gen_spectrums)
     targ_spectrums = np.array(targ_spectrums)
 
+    targ_spectrums_linear = 10.0 ** (targ_spectrums / 10.0)
+    gen_spectrums_linear = 10.0 ** (gen_spectrums / 10.0)
+    median_gen_linear = np.median(gen_spectrums_linear, axis=0)
+    median_targ_linear = np.median(targ_spectrums_linear, axis=0)
+    median_dist_linear = l2(median_targ_linear, median_gen_linear) / norm(median_targ_linear, 2)
+
     median_gen = np.median(gen_spectrums, axis=0)
     median_targ = np.median(targ_spectrums, axis=0)
     median_dist = l2(median_targ, median_gen) / norm(median_targ, 2)
@@ -320,7 +326,7 @@ def evaluate_spectrum_distance(targ_spectrums, gen_spectrums, subinds, fft):
         inband_median_dist = l2(inband_median_targ, inband_median_gen) / norm(inband_median_targ, 2)
         outband_median_gen, outband_median_targ = median_gen[non_spectrum_inds], median_targ[non_spectrum_inds]
         outband_median_dist = l2(outband_median_targ, outband_median_gen) / norm(outband_median_targ, 2)
-    return median_dist, inband_median_dist, outband_median_dist
+    return median_dist, inband_median_dist, outband_median_dist, median_dist_linear
 
 
 def calulate_empirical_SNR(demod_symbols, waveform_set, ofdm_params):
