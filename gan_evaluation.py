@@ -306,8 +306,10 @@ def test_gan(G_net, train_hist_df, output_path, device, gan_name, specs, data_sc
 
         # PSD distance metrics and plotting
         evalofdm.plot_psd_distributions(targ_psd, gen_psd, output_path, psd_method="eigen")
-        wholeband_dist, inband_dist, outband_dist = evalofdm.evaluate_spectrum_distance(targ_psd, gen_psd, subcarrier_inds, fft)
+        wholeband_dist, inband_dist, outband_dist, wholeband_dist_linear = \
+            evalofdm.evaluate_spectrum_distance(targ_psd, gen_psd, subcarrier_inds, fft)
         metric_dict["relative_median_l2"] = wholeband_dist
+        metric_dict["relative_median_l2_linear"] = wholeband_dist_linear
         metric_dict["inband_relative_median_l2"] = inband_dist
         metric_dict["outband_relative_median_l2"] = outband_dist
 
@@ -389,6 +391,7 @@ def retest_gan(dir_path):
     with open(dir_path + 'gan_train_config.json', 'r') as fp:
         train_specs_dict = json.loads(fp.read())
     dataset = train_specs_dict["dataloader_specs"]["dataset_specs"]["data_set"]
+    print(f"Dataset: {dataset}")
     with open(rf'./Datasets/{dataset}/ofdm_cls.json', 'r') as F:
         ofdm_params = json.loads(F.read())
     targ_data, targ_labels, _ = load_target(dataset, complex, "test")
@@ -432,9 +435,10 @@ def retest_gan(dir_path):
     metric_dict["target_coher_bandw_std"] = targ_coher_BWs_std
     # PSD distance metrics and plotting
     evalofdm.plot_psd_distributions(targ_psd, gen_psd, dir_path, psd_method="eigen")
-    wholeband_dist, inband_dist, outband_dist = \
+    wholeband_dist, inband_dist, outband_dist, wholeband_dist_linear = \
         evalofdm.evaluate_spectrum_distance(targ_psd, gen_psd, subcarrier_inds, fft)
     metric_dict["relative_median_l2"] = wholeband_dist
+    metric_dict["relative_median_l2_linear"] = wholeband_dist_linear
     metric_dict["inband_relative_median_l2"] = inband_dist
     metric_dict["outband_relative_median_l2"] = outband_dist
     if save_bool:
