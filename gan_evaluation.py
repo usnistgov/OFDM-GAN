@@ -306,15 +306,22 @@ def test_gan(G_net, train_hist_df, output_path, device, gan_name, specs, data_sc
 
         # PSD distance metrics and plotting
         evalofdm.plot_psd_distributions(targ_psd, gen_psd, output_path, psd_method="eigen")
-        wholeband_dist, inband_dist, outband_dist, wholeband_dist_linear = \
+        wholeband_dist, wholeband_dist_linear, pseudo_psd_metric, percentile_psd_dists = \
             evalofdm.evaluate_spectrum_distance(targ_psd, gen_psd, subcarrier_inds, fft)
+
+        plt.plot(np.linspace(0, 100, 30), percentile_psd_dists)
+        plt.xlabel("PSD Distribution Percentiles")
+        plt.ylabel("Geodesic PSD Distance")
+        plt.savefig(f"{output_path}/psd_percentile_dists.png", dpi=300)
+        plt.clf()
+
+        metric_dict["geodesic_psd_distance"] = pseudo_psd_metric
         metric_dict["relative_median_l2"] = wholeband_dist
         metric_dict["relative_median_l2_linear"] = wholeband_dist_linear
-        metric_dict["inband_relative_median_l2"] = inband_dist
-        metric_dict["outband_relative_median_l2"] = outband_dist
+        metric_dict["percentile_psd_dists"] = percentile_psd_dists
 
         with open(rf'{output_path}/distance_metrics.json', 'w') as F:
-            F.write(json.dumps(metric_dict))
+            F.write(json.dumps(metric_dict, cls=MyEncoder))
 
     except TypeError:
         print("eval broken")
@@ -386,8 +393,11 @@ def retest_gan(dir_path):
     :return:
     """
     save_bool = True
-    with open(rf'{dir_path}distance_metrics.json', 'r') as F:
-        metric_dict = json.loads(F.read())
+    try:
+        with open(rf'{dir_path}distance_metrics.json', 'r') as F:
+            metric_dict = json.loads(F.read())
+    except FileNotFoundError:
+        metric_dict = {}
     with open(dir_path + 'gan_train_config.json', 'r') as fp:
         train_specs_dict = json.loads(fp.read())
     dataset = train_specs_dict["dataloader_specs"]["dataset_specs"]["data_set"]
@@ -399,18 +409,15 @@ def retest_gan(dir_path):
     gen_data = h5f['generates'][:]
     h5f.close()
 
+    targ_psd = np.genfromtxt(rf'./Datasets/{dataset}/psd_vectors.csv', delimiter=",")
+
+    _, _, _, gen_psd, gen_SNR_data, gen_EVM_data, gen_BER, gen_coher_BWs, gen_subinds = \
+        evalofdm.evaluate_ofdm(gen_data, dir_path, dataset, "Generated", save_bool)
     cp_corr_ratio = evalofdm.evaluate_cyclic_prefix(data_loading.pack_to_complex(gen_data),
                                                     data_loading.pack_to_complex(targ_data),
                                                     ofdm_params["cyclic_prefix"], ofdm_params["num_frames"],
                                                     dir_path, save_bool)
     metric_dict["cyclic_prefix_ratio"] = cp_corr_ratio
-
-    _, _, _, gen_psd, gen_SNR_data, gen_EVM_data, gen_BER, gen_coher_BWs, gen_subinds = \
-        evalofdm.evaluate_ofdm(gen_data, dir_path, dataset, "Generated", save_bool)
-
-    fft = ofdm_params["symbol_length"]
-    subcarrier_inds = gen_subinds[0]
-
     metric_dict["evm"] = gen_EVM_data[0]
     metric_dict["evm_quant_025"] = gen_EVM_data[1]
     metric_dict["evm_quant_975"] = gen_EVM_data[2]
@@ -418,7 +425,6 @@ def retest_gan(dir_path):
     metric_dict["median_snr_quant_025"] = gen_SNR_data[1]
     metric_dict["median_snr_quant_975"] = gen_SNR_data[2]
     metric_dict["BER"] = gen_BER
-    targ_psd = np.genfromtxt(rf'./Datasets/{dataset}/psd_vectors.csv', delimiter=",")
     gen_coher_BWs_mean, gen_coher_BWs_std = None, None
     targ_coher_BWs_mean, targ_coher_BWs_std = None, None
     if ofdm_params["channel3gpp"] is not None:
@@ -433,14 +439,29 @@ def retest_gan(dir_path):
     metric_dict["coher_bandw_std"] = gen_coher_BWs_std
     metric_dict["target_coher_bandw_mean"] = targ_coher_BWs_mean
     metric_dict["target_coher_bandw_std"] = targ_coher_BWs_std
+
     # PSD distance metrics and plotting
     evalofdm.plot_psd_distributions(targ_psd, gen_psd, dir_path, psd_method="eigen")
-    wholeband_dist, inband_dist, outband_dist, wholeband_dist_linear = \
+
+    #if len(gen_data.shape) > 2:
+    #    gen_data = data_loading.pack_to_complex(gen_data)
+    #gen_psd = evalofdm.calculate_PSDs(gen_data, psd_method="eigen")
+
+    fft = ofdm_params["symbol_length"]
+    subcarrier_inds = None
+    wholeband_dist, wholeband_dist_linear, pseudo_psd_metric, percentile_psd_dists = \
         evalofdm.evaluate_spectrum_distance(targ_psd, gen_psd, subcarrier_inds, fft)
+
+    plt.plot(np.linspace(0, 100, 30), percentile_psd_dists)
+    plt.xlabel("PSD Distribution Percentiles")
+    plt.ylabel("Geodesic PSD Distance")
+    plt.savefig(f"{dir_path}psd_percentile_dists.png", dpi=300)
+    plt.clf()
+
+    metric_dict["geodesic_psd_distance"] = pseudo_psd_metric
     metric_dict["relative_median_l2"] = wholeband_dist
     metric_dict["relative_median_l2_linear"] = wholeband_dist_linear
-    metric_dict["inband_relative_median_l2"] = inband_dist
-    metric_dict["outband_relative_median_l2"] = outband_dist
+    metric_dict["percentile_psd_dists"] = percentile_psd_dists
     if save_bool:
         with open(rf'{dir_path}distance_metrics.json', 'w') as F:
-            F.write(json.dumps(metric_dict))
+            F.write(json.dumps(metric_dict, cls=MyEncoder))

@@ -89,7 +89,7 @@ def create_OFDM(num_samples=16384, num_symbols=16, mod_order=16, num_subcarriers
 
 def save_dataset(num_samples=65536, traffic_setting="low_traffic", mod_order=16, symbol_length=128, EVM=-25,
                  cp_type="long", scfdma=False, data_rep="iq", bitstream_type="random", channel_3gpp=None,
-                 num_frames=1, normalize=True, evaluate=False):
+                 num_frames=1, normalize=True, evaluate=False, set_num=None):
     """
     Save Training target distribution as well as supporting metadata and evaluations
     :param num_samples: Int number of samples synthesized for training distribution
@@ -136,13 +136,18 @@ def save_dataset(num_samples=65536, traffic_setting="low_traffic", mod_order=16,
 
     if not os.path.isdir(dir_path):
         os.makedirs(dir_path)
-
-    h5f = h5py.File(f'{dir_path}/test.h5', 'w')
+    if set_num is not None:
+        h5f = h5py.File(f'{dir_path}/test_{str(set_num)}.h5', 'w')
+    else:
+        h5f = h5py.File(f'{dir_path}/test.h5', 'w')
     test_dataset = test_dataset.values
     h5f.create_dataset('train', data=test_dataset)
     h5f.close()
 
-    h5f = h5py.File(f'{dir_path}/train.h5', 'w')
+    if set_num is not None:
+        h5f = h5py.File(f'{dir_path}/train_{str(set_num)}.h5', 'w')
+    else:
+        h5f = h5py.File(f'{dir_path}/train.h5', 'w')
     train_dataset = train_dataset.values
     h5f.create_dataset('train', data=train_dataset)
     h5f.close()

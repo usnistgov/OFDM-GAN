@@ -176,10 +176,10 @@ def init_GAN_model(specs, input_length, output_path, rank):
         specs["progressive_kernels"] = False
         if input_length[0] > input_length[1]:
             specs["kernel_size"] = (4, 4)
-            specs["model_levels"] = int(np.log2(input_length[1]) - 1)
+            # specs["model_levels"] = int(np.log2(input_length[1]) - 1)
         else:
             specs["kernel_size"] = (4, 4)
-            specs["model_levels"] = int(np.log2(input_length[0]) - 1)
+            # specs["model_levels"] = int(np.log2(input_length[0]) - 1)
         specs["lower_resolution"] = [input_dim // specs["stride"] ** specs["model_levels"] for input_dim in input_length]
     max_c, min_c = 1024, 32
     G_channel_list = [max_c // (2 ** i) if max_c // (2 ** i) > min_c else min_c for i in range(specs["model_levels"])]

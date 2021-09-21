@@ -1,8 +1,4 @@
-/Datasets/CIFAR/
-/Datasets/FashionMNIST/
-/Datasets/MNIST/
-/Datasets/Noise/
-/Datasets/OFDM/
+/Datasets
 /experiment_results/
 .idea
 /IQGAN_project_archived/

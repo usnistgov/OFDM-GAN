@@ -12,7 +12,7 @@ from utils.synthetic_ofdm_modem import constellation_symbols
 #%%
 
 df_temp = []
-dir_path = "/experiment_results/data_throughput_experiment/*/*/*/distance_metrics.json"
+dir_path = "./experiment_results/data_throughput_experiment/*/*/*/distance_metrics.json"
 dataset_fft_dict = {'256fft_subs36': 256,
                     '128fft_subs56': 128,
                     '256fft_subs112': 256,
@@ -31,24 +31,26 @@ dataset_rank_dict = {'256fft_subs36': 4,
                     '256fft_subs74': 5,
                     '512fft_subs150': 8,
                     '512fft_subs74': 7}
+
 dist_paths = glob.glob(dir_path)
+print(dist_paths)
 for path in dist_paths:
     print(path)
     with open(path) as f:
         data = json.load(f)
         data["config"] = path
-        data["dataset"] = data["config"].split("/")[8]
-        data["model"] = data["config"].split("/")[7]
-        data["timestamp"] = data["config"].split("/")[9]
+        data["dataset"] = data["config"].split("/")[4]
+        data["model"] = data["config"].split("/")[3]
+        data["timestamp"] = data["config"].split("/")[5]
         df_temp.append(data)
 df = pd.DataFrame(df_temp)
 df["fft"] = df["dataset"].map(dataset_fft_dict)
 df["rank"] = df["dataset"].map(dataset_rank_dict)
 print(df["model"].unique())
-df.to_csv("/home/jgs3/PycharmProjects/iqgan/experiment_results/data_throughput_experiment/full_results.csv", index=False)
+df.to_csv("./experiment_results/data_throughput_experiment/full_results.csv", index=False)
+#%%
 
-
-metrics_df = pd.read_csv("/experiment_results/data_throughput_experiment/full_results.csv")
+metrics_df = pd.read_csv("./experiment_results/data_throughput_experiment/full_results.csv")
 models = ['WaveGAN', "PSK-GAN", 'STFT-GAN']
 colors = ["blue", "green", "red"]
 
@@ -61,23 +63,23 @@ for model, color in zip(models, colors):
     jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
               -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
               -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1]
-    plt.plot(model_metrics_df["rank"] + jitter, 100 * model_metrics_df["relative_median_l2"], color=color,
+    plt.plot(model_metrics_df["rank"] + jitter, model_metrics_df["geodesic_psd_distance"], color=color,
              alpha=0.5, linestyle="", marker="o")
-
+    print(model_metrics_df["geodesic_psd_distance"])
     model_metrics_avg = model_metrics_df.groupby(["fft", "rank"]).mean().reset_index()
 
     metrics_128 = model_metrics_avg[model_metrics_avg["fft"] == 128]
     metrics_256 = model_metrics_avg[model_metrics_avg["fft"] == 256]
     metrics_512 = model_metrics_avg[model_metrics_avg["fft"] == 512]
 
-    plt.plot(metrics_128["rank"], 100 * metrics_128["relative_median_l2"], color=color, linestyle="-", alpha=0.75)
-    plt.plot(metrics_256["rank"], 100 * metrics_256["relative_median_l2"], color=color, linestyle="-", alpha=0.75)
-    plt.plot(metrics_512["rank"], 100 * metrics_512["relative_median_l2"], color=color, linestyle="-", alpha=0.75, label=model)
+    plt.plot(metrics_128["rank"], metrics_128["geodesic_psd_distance"], color=color, linestyle="-", alpha=0.75)
+    plt.plot(metrics_256["rank"], metrics_256["geodesic_psd_distance"], color=color, linestyle="-", alpha=0.75)
+    plt.plot(metrics_512["rank"], metrics_512["geodesic_psd_distance"], color=color, linestyle="-", alpha=0.75, label=model)
 
 plt.xticks(range(1, 10), [r"128-Small", "128-Medium", "128-Large", "256-Small", "256-Medium", "256-Large",
                       "512-Small", "512-Medium", "512-Large"], rotation=45)
 
-plt.ylabel("Median PSD Relative Error (%)")
+plt.ylabel(r"PSD Geodesic Distance ($d_g$)")
 plt.grid(True)
 ax.set_xticklabels([])
 
@@ -123,11 +125,11 @@ for model, color in zip(models, colors):
     plt.plot(metrics_512["rank"], 100 * metrics_512["cyclic_prefix_ratio"], color=color, linestyle="-", alpha=0.75, label=model)
 plt.xticks(range(1, 10), [r"128-Small", "128-Medium", "128-Large", "256-Small", "256-Medium", "256-Large",
                       "512-Small", "512-Medium", "512-Large"], rotation=45)
-plt.ylabel(r"Max CP Correlation Relative Error (%)")
+plt.ylabel(r"$\rm RelErr_{CP}$ (%)") # cyclic_prefix_ratio
 plt.grid(True)
 plt.legend()
-plt.tight_layout()
-plt.savefig("./experiment_results/main_experiment_plot.png")
+# plt.tight_layout()
+plt.savefig("./experiment_results/main_experiment_plot_geodesic.png", bbox_inches='tight')
 plt.show()
 
 #%%  Combined main experiment Constellation plots
@@ -187,15 +189,33 @@ for model in models:
 #%% Modulation Experiment
 
 df_temp = []
-dir_path = "/experiment_results/modulation_experiment/*/*/distance_metrics.json"
-
+dir_path = "./experiment_results/modulation_experiment/*/*/distance_metrics.json"
+dataset_fft_dict = {'256fft_subs36': 256,
+                    '128fft_subs56': 128,
+                    '256fft_subs112': 256,
+                    '512fft_subs224': 512,
+                    '128fft_subs36': 128,
+                    '128fft_subs18': 128,
+                    '256fft_subs74': 256,
+                    '512fft_subs150': 512,
+                    '512fft_subs74': 512}
+dataset_rank_dict = {'256fft_subs36': 4,
+                    '128fft_subs56': 3,
+                    '256fft_subs112': 6,
+                    '512fft_subs224': 9,
+                    '128fft_subs36': 2,
+                    '128fft_subs18': 1,
+                    '256fft_subs74': 5,
+                    '512fft_subs150': 8,
+                    '512fft_subs74': 7}
 dist_paths = glob.glob(dir_path)
 for path in dist_paths:
     with open(path) as f:
+        print(path)
         data = json.load(f)
         data["config"] = path
-        data["dataset"] = data["config"].split("/")[7]
-        data["timestamp"] = data["config"].split("/")[8]
+        data["dataset"] = data["config"].split("/")[3]
+        data["timestamp"] = data["config"].split("/")[4]
         df_temp.append(data)
 df = pd.DataFrame(df_temp)
 df["fft"] = df["dataset"].map(dataset_fft_dict)
@@ -296,14 +316,11 @@ plt.show()
 
 #%%
 
-
 import matplotlib
 font = {'size': 12}
 matplotlib.rc('font', **font)
-fig = plt.figure(figsize=(5, 5))
 
-
-metrics_df = pd.read_csv("/experiment_results/modulation_experiment/full_results.csv")
+metrics_df = pd.read_csv("./experiment_results/modulation_experiment/full_results.csv")
 dataset_rank_dict = {'QPSK_modulation': 1, '16QAM_modulation': 2,
              '32QAM_modulation': 3, '64QAM_modulation': 4}
 datasets = ['QPSK_modulation', '16QAM_modulation', '32QAM_modulation', '64QAM_modulation']
@@ -311,18 +328,38 @@ metrics_df = metrics_df[metrics_df["dataset"].isin(datasets)]
 metrics_df["rank"] = metrics_df["dataset"].map(dataset_rank_dict)
 metrics_df = metrics_df.sort_values(by=["rank"])
 
+fig = plt.figure(figsize=(5, 10))
+gs = gridspec.GridSpec(ncols=1, nrows=3, wspace=0.0, hspace=0.02)
+ax = plt.subplot(gs[0, 0])
+jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1]
+plt.plot(metrics_df["rank"] + jitter, metrics_df["geodesic_psd_distance"], color="black", linestyle="", marker="o")
+# plt.xticks(range(1, 5), ['QPSK', '16-QAM', '32-QAM', '64-QAM'])
+plt.ylabel("Geodesic PSD Distance ($d_G$)")
+plt.xlabel("Modulation Order")
+plt.grid(True)
+
+ax = plt.subplot(gs[1, 0])
 jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
           -0.1, 0, 0.1]
 plt.plot(metrics_df["rank"] + jitter, metrics_df["evm"], color="black", linestyle="", marker="o")
-plt.xticks(range(1,5), ['QPSK', '16-QAM', '32-QAM', '64-QAM'])
+#plt.xticks(range(1,5), ['QPSK', '16-QAM', '32-QAM', '64-QAM'])
+ax.set_xticklabels([])
 plt.ylabel("EVM (dB)")
 plt.xlabel("Modulation Order")
 plt.grid(True)
-ax.set_aspect('equal', 'box')
-plt.tight_layout()
-plt.savefig("./experiment_results/modulation_evm_metrics.png")
-plt.show()
 
+ax = plt.subplot(gs[2, 0])
+jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1]
+plt.plot(metrics_df["rank"] + jitter, metrics_df["cyclic_prefix_ratio"], color="black", linestyle="", marker="o")
+plt.xticks(range(1, 5), ['QPSK', '16-QAM', '32-QAM', '64-QAM'])
+plt.ylabel("Geodesic PSD Distance ($d_G$)")
+plt.ylabel(r"$\rm RelErr_{CP}$ (%)") # cyclic_prefix_ratio
+plt.xlabel("Modulation Order")
+plt.grid(True)
+plt.savefig("./experiment_results/modulation_metrics.png", bbox_inches="tight")
+plt.show()
 
 #%% Channel model experiment
 

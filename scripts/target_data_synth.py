@@ -1,5 +1,10 @@
 from utils.construct_ofdm import save_dataset
 
+# save_dataset(traffic_setting="mid_traffic", mod_order=16, symbol_length=512, EVM=-25, num_frames=2, channel_3gpp="EPA5Hz")
+# save_dataset(traffic_setting="mid_traffic", mod_order=16, symbol_length=512, EVM=-40, num_frames=2, channel_3gpp="EVA70Hz")
+save_dataset(traffic_setting="mid_traffic", mod_order=16, symbol_length=512, EVM=-50, num_frames=2, channel_3gpp="ETU300Hz")
+
+
 #%% Allocation Datasets
 save_dataset(traffic_setting="low_traffic", mod_order=16, symbol_length=128, EVM=-25, num_frames=1)
 save_dataset(traffic_setting="mid_traffic", mod_order=16, symbol_length=128, EVM=-25, num_frames=1)
@@ -27,3 +32,9 @@ save_dataset(num_samples=16384, traffic_setting="mid_traffic", mod_order=16, sym
 save_dataset(num_samples=16384, traffic_setting="mid_traffic", mod_order=16, symbol_length=512, EVM=-25, num_frames=2, bitstream_type="random_fixed", channel_3gpp="ETU300Hz")
 
 
+#%%
+
+from utils.construct_ofdm import save_dataset
+
+save_dataset(num_samples=2048, traffic_setting="mid_traffic", mod_order=16, symbol_length=512, EVM=-25,
+             num_frames=2, channel_3gpp="EPA5Hz", set_num=1)

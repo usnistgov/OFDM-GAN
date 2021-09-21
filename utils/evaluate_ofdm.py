@@ -5,6 +5,7 @@ import numpy as np
 import data_loading
 from spectrum import pmtm
 from numpy.linalg import norm
+from scipy.integrate import simpson
 from numpy.fft import fftshift
 from matplotlib import pyplot as plt
 from data_loading import pack_to_complex
@@ -255,14 +256,14 @@ def calculate_PSDs(iq_data, psd_method="eigen"):
     if psd_method == "adapt":
         iq_data = iq_data[:500]
     print("Estimate PSD", end=": ")
-    for i, sample in enumerate(iq_data):
+    for i, sample in enate(iq_data):
         if i % (len(iq_data) // 10) == 0:
             print(i, end=", ")
         # use the multitaper method to compute spectral power
         Sk, weights, eigenvalues = pmtm(sample, NW=4, k=7, method=psd_method)
         if psd_method == "adapt":
             weights = weights.transpose()
-        spectrum = 10 * np.log10(np.abs(np.mean(Sk * weights, axis=0) ** 2))
+        spectrum = 10 * np.log10(np.abs(np.mean(Sk * weights, axis=0)) ** 2)
         spectrums.append(spectrum)
     return spectrums
 
@@ -319,14 +320,23 @@ def evaluate_spectrum_distance(targ_spectrums, gen_spectrums, subinds, fft):
     median_gen = np.median(gen_spectrums, axis=0)
     median_targ = np.median(targ_spectrums, axis=0)
     median_dist = l2(median_targ, median_gen) / norm(median_targ, 2)
-    inband_median_dist, outband_median_dist = None, None
-    # compute the inband and out-band portion of the PSD relative error if the subcarrier indicies are known
-    if subinds is not None and non_spectrum_inds is not None:
-        inband_median_gen, inband_median_targ = median_gen[subinds], median_targ[subinds]
-        inband_median_dist = l2(inband_median_targ, inband_median_gen) / norm(inband_median_targ, 2)
-        outband_median_gen, outband_median_targ = median_gen[non_spectrum_inds], median_targ[non_spectrum_inds]
-        outband_median_dist = l2(outband_median_targ, outband_median_gen) / norm(outband_median_targ, 2)
-    return median_dist, inband_median_dist, outband_median_dist, median_dist_linear
+
+    step_size = 1/len(median_gen_linear)
+    log_psd_ratio = np.log(median_gen_linear) - np.log(median_targ_linear)
+    pseudo_psd_metric = np.sqrt(np.sum(log_psd_ratio ** 2 * step_size) - np.sum(log_psd_ratio * step_size) ** 2)
+    # np.sqrt(simpson(log_psd_ratio ** 2, dx=step_size) - simpson(log_psd_ratio, dx=step_size) ** 2)
+
+    percentiles = np.linspace(0, 100, 30)
+    geodesic_dists = []
+    for perc in percentiles:
+        gen_perc = np.percentile(gen_spectrums_linear, q=perc, axis=0)
+        targ_perc = np.percentile(targ_spectrums_linear, q=perc, axis=0)
+        step_size = 1 / len(gen_perc)
+        log_psd_ratio = np.log(gen_perc) - np.log(targ_perc)
+        percentile_geodesic_dist = np.sqrt(np.sum(log_psd_ratio ** 2 * step_size) -
+                                           np.sum(log_psd_ratio * step_size) ** 2)
+        geodesic_dists.append(percentile_geodesic_dist)
+    return median_dist, median_dist_linear, pseudo_psd_metric, geodesic_dists
 
 
 def calulate_empirical_SNR(demod_symbols, waveform_set, ofdm_params):
