@@ -116,7 +116,6 @@ patsy=0.5.1=py_0
 pcre=8.44=he6710b0_0
 pexpect=4.8.0=pyhd3eb1b0_3
 pickleshare=0.7.5=pyhd3eb1b0_1003
-pillow=8.2.0=py37he98fc37_0
 pip=21.0.1=py37h06a4308_0
 pixman=0.40.0=h7b6447c_0
 pluggy=0.13.1=pypi_0
