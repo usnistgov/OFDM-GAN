@@ -5,7 +5,7 @@ import numpy as np
 import data_loading
 from spectrum import pmtm
 from numpy.linalg import norm
-from scipy.integrate import simpson
+#from scipy.integrate import simpson
 from numpy.fft import fftshift
 from matplotlib import pyplot as plt
 from data_loading import pack_to_complex
@@ -223,7 +223,7 @@ def calculate_EVMs(demod_data_symbols, demod_closest_data_symbols):
     evm = np.median(mean_EVMs)
     evm_quantile_025 = np.quantile(mean_EVMs, 0.025)
     evm_quantile_975 = np.quantile(mean_EVMs, 0.975)
-    print(f"Median mean-EVM: {evm}")
+    #print(f"Median mean-EVM: {evm:.1f}")
     return evm, evm_quantile_025, evm_quantile_975
 
 
@@ -255,10 +255,10 @@ def calculate_PSDs(iq_data, psd_method="eigen"):
     spectrums = []
     if psd_method == "adapt":
         iq_data = iq_data[:500]
-    print("Estimate PSD", end=": ")
-    for i, sample in enate(iq_data):
-        if i % (len(iq_data) // 10) == 0:
-            print(i, end=", ")
+    #print("Estimate PSD", end=": ")
+    for i, sample in enumerate(iq_data):
+        #if i % (len(iq_data) // 10) == 0:
+        #    print(i, end=", ")
         # use the multitaper method to compute spectral power
         Sk, weights, eigenvalues = pmtm(sample, NW=4, k=7, method=psd_method)
         if psd_method == "adapt":

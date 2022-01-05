@@ -353,4 +353,7 @@ def gan_train(rank, world_size, specs=None, gan_name=None, output_path=None):
 
         if specs["eval_model"]:
             print("begin GAN generator evaluation")
-            test_gan(G_net, train_hist_df, output_path, device, gan_name, specs, data_scaler)
+            try:
+                test_gan(G_net, train_hist_df, output_path, device, gan_name, specs, data_scaler)
+            except Exception as e:
+                print(f"Evaluating GAN error: {e}")

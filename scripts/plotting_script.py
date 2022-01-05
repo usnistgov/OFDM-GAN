@@ -474,3 +474,271 @@ plt.close('all')
 
 
 #%%
+
+df_temp = []
+dir_path = "./experiment_results/imparements_experiment/*/*/distance_metrics.json"
+dist_paths = glob.glob(dir_path)
+
+for rank, path in enumerate(dist_paths):
+    with open(path) as f:
+        data = json.load(f)
+        data["config"] = path
+        data["dataset"] = data["config"].split("/")[4]
+        data["model"] = data["config"].split("/")[3]
+        data["timestamp"] = data["config"].split("/")[5]
+        data["rank"] = rank
+        df_temp.append(data)
+df = pd.DataFrame(df_temp)
+df.to_csv("./experiment_results/imparements_experiment/full_results.csv", index=False)
+print(len(df))
+
+#%%
+"""
+metrics_df = pd.read_csv("./experiment_results/imparements_experiment/full_results.csv")
+colors = ["blue", "green", "red"]
+
+fig = plt.figure(figsize=(5, 10))
+gs = gridspec.GridSpec(ncols=1, nrows=3, wspace=0.0, hspace=0.02)
+ax = plt.subplot(gs[0, 0])
+model_metrics_df = metrics_df[metrics_df["model"] == model]
+num_samples = len(model_metrics_df["rank"])
+jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1]
+plt.plot(model_metrics_df["rank"] + jitter, model_metrics_df["geodesic_psd_distance"], color=color,
+         alpha=0.5, linestyle="", marker="o")
+print(model_metrics_df["geodesic_psd_distance"])
+model_metrics_avg = model_metrics_df.groupby(["fft", "rank"]).mean().reset_index()
+
+metrics_128 = model_metrics_avg[model_metrics_avg["fft"] == 128]
+metrics_256 = model_metrics_avg[model_metrics_avg["fft"] == 256]
+metrics_512 = model_metrics_avg[model_metrics_avg["fft"] == 512]
+
+plt.plot(metrics_128["rank"], metrics_128["geodesic_psd_distance"], color=color, linestyle="-", alpha=0.75)
+plt.plot(metrics_256["rank"], metrics_256["geodesic_psd_distance"], color=color, linestyle="-", alpha=0.75)
+plt.plot(metrics_512["rank"], metrics_512["geodesic_psd_distance"], color=color, linestyle="-", alpha=0.75, label=model)
+
+plt.xticks(range(1, 10), [r"128-Small", "128-Medium", "128-Large", "256-Small", "256-Medium", "256-Large",
+                      "512-Small", "512-Medium", "512-Large"], rotation=45)
+plt.ylabel(r"PSD Geodesic Distance ($d_g$)")
+plt.grid(True)
+ax.set_xticklabels([])
+
+
+ax = plt.subplot(gs[1, 0])
+model_metrics_df = metrics_df[metrics_df["model"] == model]
+num_samples = len(model_metrics_df["rank"])
+jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1]
+plt.plot(model_metrics_df["rank"]+jitter, model_metrics_df["evm"], color=color, linestyle="",
+         alpha=0.5, marker="o")
+model_metrics_avg = model_metrics_df.groupby(["fft", "rank"]).mean().reset_index()
+metrics_128 = model_metrics_avg[model_metrics_avg["fft"] == 128]
+metrics_256 = model_metrics_avg[model_metrics_avg["fft"] == 256]
+metrics_512 = model_metrics_avg[model_metrics_avg["fft"] == 512]
+plt.plot(metrics_128["rank"], metrics_128["evm"], color=color, linestyle="-", alpha=0.75)
+plt.plot(metrics_256["rank"], metrics_256["evm"], color=color, linestyle="-", alpha=0.75)
+plt.plot(metrics_512["rank"], metrics_512["evm"], color=color, linestyle="-", alpha=0.75, label=model)
+plt.xticks(range(1, 10), [r"128-Small", "128-Medium", "128-Large", "256-Small", "256-Medium", "256-Large",
+                      "512-Small", "512-Medium", "512-Large"], rotation=45)
+plt.ylabel(r"EVM (dB)")
+plt.grid(True)
+ax.set_xticklabels([])
+
+
+ax = plt.subplot(gs[2, 0])
+model_metrics_df = metrics_df[metrics_df["model"] == model]
+num_samples = len(model_metrics_df["rank"])
+jitter = [-0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1,
+          -0.1, 0, 0.1, -0.1, 0, 0.1, -0.1, 0, 0.1]
+plt.plot(model_metrics_df["rank"]+jitter, 100 * model_metrics_df["cyclic_prefix_ratio"], color=color, linestyle="",
+         alpha=0.5, marker="o")
+model_metrics_avg = model_metrics_df.groupby(["fft", "rank"]).mean().reset_index()
+metrics_128 = model_metrics_avg[model_metrics_avg["fft"] == 128]
+metrics_256 = model_metrics_avg[model_metrics_avg["fft"] == 256]
+metrics_512 = model_metrics_avg[model_metrics_avg["fft"] == 512]
+plt.plot(metrics_128["rank"], 100 * metrics_128["cyclic_prefix_ratio"], color=color, linestyle="-", alpha=0.75)
+plt.plot(metrics_256["rank"], 100 * metrics_256["cyclic_prefix_ratio"], color=color, linestyle="-", alpha=0.75)
+plt.plot(metrics_512["rank"], 100 * metrics_512["cyclic_prefix_ratio"], color=color, linestyle="-", alpha=0.75, label=model)
+plt.xticks(range(1, 10), [r"128-Small", "128-Medium", "128-Large", "256-Small", "256-Medium", "256-Large",
+                      "512-Small", "512-Medium", "512-Large"], rotation=45)
+plt.ylabel(r"$\rm RelErr_{CP}$ (%)") # cyclic_prefix_ratio
+plt.grid(True)
+plt.legend()
+# plt.tight_layout()
+plt.savefig("./experiment_results/main_experiment_plot_geodesic.png", bbox_inches='tight')
+plt.show()
+"""
+
+
+parent_path = "/home/jgs3/PycharmProjects/iqgan/experiment_results/imparements_experiment/"
+results_list = ["impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO0_Dg0.01_Dphi0.017/2021-12-04_01-34-24/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO0_Dg0.1_Dphi0.087/2021-12-03_15-42-02/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO0_Dg0.2_Dphi0.174/2021-12-04_11-30-21/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO50_Dg0.01_Dphi0.017/2021-12-05_07-41-09/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO50_Dg0.1_Dphi0.087/2021-12-04_21-35-45/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO50_Dg0.2_Dphi0.174/2021-12-03_15-44-05/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO150_Dg0.01_Dphi0.017/2021-12-04_10-55-36/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO150_Dg0.1_Dphi0.087/2021-12-04_01-11-09/",
+                "impairments_experiment_256fft_rblocks1_subs112_evm-25_CFO150_Dg0.2_Dphi0.174/2021-12-04_20-42-00/"]
+
+target_parent_path = "/Datasets/_archive/impairments_sets/"
+target_list = ["256fft_rblocks1_subs112_evm-25_CFO0_Dg0.01_Dphi0.017/",
+               "256fft_rblocks1_subs112_evm-25_CFO0_Dg0.1_Dphi0.087/",
+               "256fft_rblocks1_subs112_evm-25_CFO0_Dg0.2_Dphi0.174/",
+               "256fft_rblocks1_subs112_evm-25_CFO50_Dg0.01_Dphi0.017/",
+               "256fft_rblocks1_subs112_evm-25_CFO50_Dg0.1_Dphi0.087/",
+               "256fft_rblocks1_subs112_evm-25_CFO50_Dg0.2_Dphi0.174/",
+               "256fft_rblocks1_subs112_evm-25_CFO150_Dg0.01_Dphi0.017/",
+               "256fft_rblocks1_subs112_evm-25_CFO150_Dg0.1_Dphi0.087/",
+               "256fft_rblocks1_subs112_evm-25_CFO150_Dg0.2_Dphi0.174/"]
+dists = ["gen", "targ"]
+parent_paths = [parent_path, target_parent_path]
+lists = [results_list, target_list]
+for dist, par_path, dist_paths in zip(dists, parent_paths, lists):
+    fig = plt.figure(figsize=(7, 7))
+    gs = gridspec.GridSpec(3, 3, width_ratios=[1, 1, 1], wspace=0.01, hspace=0.01)
+    for i in range(3):
+        for j in range(3):
+            ax = plt.subplot(gs[i,j])
+
+            rank = i * 3 + j
+            data_path = dist_paths[rank]
+            h5f = h5py.File(rf"{par_path}{data_path}demodulated_gen_symbols.h5", 'r')
+            symbolstreams = h5f['demod_symbols'][:]
+            h5f.close()
+
+            demod_symbols = np.array(symbolstreams).astype(float)
+            demod_symbols = data_loading.pack_to_complex(demod_symbols)
+            mod_order = 16
+            symbol_locs = constellation_symbols(mod_order=mod_order)
+            I, Q = np.real(demod_symbols[:, ]).flatten(), np.imag(demod_symbols[:, ]).flatten()
+            Z, xedges, yedges = np.histogram2d(I, Q, bins=150, range=[[-1.5, 1.5], [-1.5, 1.5]], density=True)
+            plt.pcolormesh(xedges, yedges, Z, cmap=plt.cm.binary)
+            ax.set_xlim(-1.5, 1.5)
+            ax.set_ylim(-1.5, 1.5)
+            ax.set_aspect('equal', 'box')
+            if rank not in [0, 3, 6]:
+                ax.set_yticklabels([])
+            else:
+                ax.set_yticks([-1, 0, 1])
+            if rank not in [6, 7, 8]:
+                ax.set_xticklabels([])
+            else:
+                ax.set_xticks([-1, 0, 1])
+            if rank == 6:
+                ax.set_xlabel("Low", fontsize=14)
+            if rank == 7:
+                ax.set_xlabel("Medium", fontsize=14)
+            if rank == 8:
+                ax.set_xlabel("High", fontsize=14)
+            if rank == 0:
+                ax.set_ylabel("0%", fontsize=14)
+            if rank == 3:
+                ax.set_ylabel("0.3%", fontsize=14)
+            if rank == 6:
+                ax.set_ylabel("1%", fontsize=14)
+    fig.text(0.5, 0.01, "I/Q Imbalance", ha='center', fontsize=14)
+    fig.text(0.01, 0.5, "Carrier Frequency Offset", va='center', fontsize=14, rotation='vertical')
+    plt.savefig(f"./experiment_results/imparements_experiment_constellation_plot_{dist}.png", dpi=500)
+    plt.show()
+
+#%%
+
+
+
+cfo_list = ["./Datasets/impairment_sets/CFO050/",
+            "./Datasets/impairment_sets/CFO300/",
+            "/home/jgs3/PycharmProjects/iqgan/experiment_results/impairment_sets_CFO050/2021-12-06_15-57-23/",
+            "/home/jgs3/PycharmProjects/iqgan/experiment_results/impairment_sets_CFO300/2021-12-07_01-29-08/"]
+
+iq_imbalance_list = ["./Datasets/impairment_sets/Dg0.1_Dphi0.087/",
+                     "./Datasets/impairment_sets/Dg0.2_Dphi0.17/",
+                     "/home/jgs3/PycharmProjects/iqgan/experiment_results/impairment_sets_Dg0.1_Dphi0.087/2021-12-06_15-57-42/",
+                     "/home/jgs3/PycharmProjects/iqgan/experiment_results/impairment_sets_Dg0.2_Dphi0.17/2021-12-07_01-29-37/"]
+
+fig = plt.figure(figsize=(7, 7))
+gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1], wspace=0.01, hspace=0.01)
+for i in range(2):
+    for j in range(2):
+        ax = plt.subplot(gs[i,j])
+
+        rank = i * 2 + j
+        data_path = cfo_list[rank]
+        h5f = h5py.File(rf"{data_path}demodulated_gen_symbols.h5", 'r')
+        symbolstreams = h5f['demod_symbols'][:]
+        h5f.close()
+
+        demod_symbols = np.array(symbolstreams).astype(float)
+        demod_symbols = data_loading.pack_to_complex(demod_symbols)
+        mod_order = 16
+        symbol_locs = constellation_symbols(mod_order=mod_order)
+        I, Q = np.real(demod_symbols[:, ]).flatten(), np.imag(demod_symbols[:, ]).flatten()
+        Z, xedges, yedges = np.histogram2d(I, Q, bins=150, range=[[-1.5, 1.5], [-1.5, 1.5]], density=True)
+        plt.pcolormesh(xedges, yedges, Z, cmap=plt.cm.binary)
+        ax.set_xlim(-1.5, 1.5)
+        ax.set_ylim(-1.5, 1.5)
+        ax.set_aspect('equal', 'box')
+        if rank not in [0, 2]:
+            ax.set_yticklabels([])
+        else:
+            ax.set_yticks([-1, 0, 1])
+        if rank not in [2, 3]:
+            ax.set_xticklabels([])
+        else:
+            ax.set_xticks([-1, 0, 1])
+        if rank == 2:
+            ax.set_xlabel("0.33%", fontsize=14)
+        if rank == 3:
+            ax.set_xlabel("2.0%", fontsize=14)
+        if rank == 0:
+            ax.set_ylabel("Target Distribution", fontsize=14)
+        if rank == 2:
+            ax.set_ylabel("Generated Distribution", fontsize=14)
+fig.text(0.5, 0.01, "Carrier Frequency Offset", ha='center', fontsize=16)
+plt.savefig(f"./experiment_results/CFO_imparements_experiment_constellation_plot.png", dpi=500)
+plt.show()
+
+fig = plt.figure(figsize=(7, 7))
+gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1], wspace=0.01, hspace=0.01)
+for i in range(2):
+    for j in range(2):
+        ax = plt.subplot(gs[i,j])
+
+        rank = i * 2 + j
+        data_path = iq_imbalance_list[rank]
+        h5f = h5py.File(rf"{data_path}demodulated_gen_symbols.h5", 'r')
+        symbolstreams = h5f['demod_symbols'][:]
+        h5f.close()
+
+        demod_symbols = np.array(symbolstreams).astype(float)
+        demod_symbols = data_loading.pack_to_complex(demod_symbols)
+        mod_order = 16
+        symbol_locs = constellation_symbols(mod_order=mod_order)
+        I, Q = np.real(demod_symbols[:, ]).flatten(), np.imag(demod_symbols[:, ]).flatten()
+        Z, xedges, yedges = np.histogram2d(I, Q, bins=150, range=[[-1.5, 1.5], [-1.5, 1.5]], density=True)
+        plt.pcolormesh(xedges, yedges, Z, cmap=plt.cm.binary)
+        ax.set_xlim(-1.5, 1.5)
+        ax.set_ylim(-1.5, 1.5)
+        ax.set_aspect('equal', 'box')
+        if rank not in [0, 2]:
+            ax.set_yticklabels([])
+        else:
+            ax.set_yticks([-1, 0, 1])
+        if rank not in [2, 3]:
+            ax.set_xticklabels([])
+        else:
+            ax.set_xticks([-1, 0, 1])
+        if rank == 2:
+            ax.set_xlabel("Low Condition", fontsize=14)
+        if rank == 3:
+            ax.set_xlabel("High Condition", fontsize=14)
+        if rank == 0:
+            ax.set_ylabel("Target Distribution", fontsize=14)
+        if rank == 2:
+            ax.set_ylabel("Generated Distribution", fontsize=14)
+fig.text(0.5, 0.01, "I/Q Imbalance", ha='center', fontsize=16)
+plt.savefig(f"./experiment_results/IQ_imparements_experiment_constellation_plot.png", dpi=500)
+plt.show()
