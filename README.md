@@ -2,7 +2,7 @@
 
 ## Overview 
 This repository contains Python code to generate results for experiments on generative modeling of radio frequency (RF) communication signals, specifically synthetic Orthogonal-Frequency Division Multiplexing (OFDM) signals. This code implements two novel Generative adversarial network (GAN) 
-models, a 1D and 2D convolutional model, named **PSK-GAN** and **STFT-GAN**, respectively, as well as the **WaveGAN** model architecture as 
+models, a 1D and a 2D convolutional model, named **PSK-GAN** and **STFT-GAN**, respectively, as well as the **WaveGAN** model architecture as 
 a baseline for comparison.  For experiment details and results, see
 
 J. Sklar, A. Wunderlich, "Feasibility of Modeling Orthogonal Frequency-Division Multiplexing Communication Signals with Unsupervised Generative Adversarial Networks", Journal of Research of the National Institute of Standards and Technology, Volume 126, Article No. 126046 (2021) https://doi.org/10.6028/jres.126.046.  
@@ -42,9 +42,7 @@ main.py --configs ./experiment_resources/test_configs_channel_STFTGAN.csv
 Aggregated plots across model runs are created using the script `./scripts/plotting_script.py`.
 
 ## <u>Implementation Notes</u>
-Single process multi-GPU training is done using Pytorch's DataParallel method, in order to increase training speed. 
-(Multi-process multi-GPU (DistributedDataParallel) is not compatible with the gradient penalty operation (autograd.grad) 
-and is not recommended when using Wasserstein-GP loss).
+Single process multi-GPU training is done using Pytorch's DataParallel method, in order to increase training speed.  During code development, we found that multi-process multi-GPU training using the DistributedDataParallel method was not compatible with the gradient penalty operation (autograd.grad).  Therefore, DistributedDataParallel is not recommended when using Wasserstein-GP loss.
 
 ## <u>Authors</u>
 Jack Sklar (jack.sklar@nist.gov) and Adam Wunderlich (adam.wunderlich@nist.gov) \
