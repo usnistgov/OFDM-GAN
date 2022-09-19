@@ -1,7 +1,7 @@
 # <u> **Software for Modeling OFDM Communication Signals with Generative Adversarial Networks** </u>
 
 ## Overview 
-This repository contains Python code to generate results for experiments on generative modeling of radio frequency (RF) communication signals, specifically synthetic Orthogonal-Frequency Division Multiplexing (OFDM) signals. This code implements two novel Generative adversarial network (GAN) 
+This repository contains python code to generate results for experiments on generative modeling of radio frequency (RF) communication signals, specifically synthetic orthogonal-frequency division multiplexing (OFDM) signals. This code implements two novel generative adversarial network (GAN) 
 models, a 1D and a 2D convolutional model, named **PSK-GAN** and **STFT-GAN**, respectively, as well as the **WaveGAN** model architecture as 
 a baseline for comparison.  For experiment details and results, see
 
