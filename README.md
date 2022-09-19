@@ -17,8 +17,7 @@ Descriptions for the fields specified in `./experiment_resources/training_specs_
 by passing a configuration table (csv file) as an argument to the main python module (ex. `main.py --configs path_to_config_table.csv`). Column labels
 of a configuration table should correspond to desired keys in the GAN configuration dictionary that are to be changed across runs. 
 
-The training and test target datasets used in this study were synthesized using the script 
-`scripts/target_data_synth.py` and are provided in a separate gzip file, `target_distributions.tar.gz`.  To execute experiments, first unzip this file and place its contents in a subdirectory named `Data/`.  When running the models, experimental results are saved in `experiment_results/`, which is divided into sub-folders corresponding to each experiment. Each experiment folder contains sub-folders with results from three trials of each test configuration.  Each test-trial folder contains saved GAN models, training metadata, as well as evaluations of the generated distributions.  Previously-computed experimental results are saved in `experiment_results.tar.gz`
+The training and test target datasets used in this study were synthesized using the script `scripts/target_data_synth.py`.  To execute experiments, first run this script and place its contents in a subdirectory named `Data/`.  When running the models, experimental results are saved in `experiment_results/`, which is divided into sub-folders corresponding to each experiment. Each experiment folder contains sub-folders with results from three trials of each test configuration.  Each test-trial folder contains saved GAN models, training metadata, as well as evaluations of the generated distributions.
 
 ## <u>Requirements</u>
 We use a `conda` virtual environment to manage the project library dependencies.
@@ -28,7 +27,6 @@ conda create --name <env> --file .experiment_resources/requirements.txt
 conda activate <env>
 pip install -r .experiment_resources/pip_requirements.txt
 ```
-
 
 ## <u>Running Experiments</u>
 This code executes three experiments: (1) a data complexity experiment, (2) a modulation order experiment, and (3) a fading channel experiment.  In order to reproduce results from each of the three experiments, run
