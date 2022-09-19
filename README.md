@@ -1,9 +1,13 @@
 # <u> **Software for Modeling OFDM Communication Signals with Generative Adversarial Networks** </u>
 
+## Overview 
 This repository contains Python code to generate results for experiments on generative modeling of radio frequency (RF) communication signals, specifically synthetic Orthogonal-Frequency Division Multiplexing (OFDM) signals. This code implements two novel Generative adversarial network (GAN) 
 models, a 1D and 2D convolutional model, named **PSK-GAN** and **STFT-GAN**, respectively, as well as the **WaveGAN** model architecture as 
 a baseline for comparison. All three GAN models are trained on synthetic datasets over a range of OFDM parameters and conditions and evaluate 
 their performance with simulated datasets.  
+
+For experiment details and results, see
+J. Sklar, A. Wunderlich, "Feasibility of Modeling Orthogonal Frequency-Division Multiplexing Communication Signals with Unsupervised Generative Adversarial Networks", Journal of Research of the National Institute of Standards and Technology, Volume 126, Article No. 126046 (2021) https://doi.org/10.6028/jres.126.046.  
 
 ## Software Implementation
 The software enables automated testing of many model configurations across different datasets. Model creation and training is implemented
@@ -17,7 +21,7 @@ Descriptions for the fields specified in `./experiment_resources/training_specs_
 by passing a configuration table (csv file) as an argument to the main python module (ex. `main.py --configs path_to_config_table.csv`). Column labels
 of a configuration table should correspond to desired keys in the GAN configuration dictionary that are to be changed across runs. 
 
-The training and test target datasets used in this study were synthesized using the script `scripts/target_data_synth.py`.  To execute experiments, first run this script and place its contents in a subdirectory named `Data/`.  When running the models, experimental results are saved in `experiment_results/`, which is divided into sub-folders corresponding to each experiment. Each experiment folder contains sub-folders with results from three trials of each test configuration.  Each test-trial folder contains saved GAN models, training metadata, as well as evaluations of the generated distributions.
+The training and test target datasets used in this study were synthesized using the script `scripts/target_data_synth.py`.  To execute experiments, first run this script and place its contents in a subdirectory named `Data/`.  When running the models, experimental results are saved in `experiment_results/`.
 
 ## <u>Requirements</u>
 We use a `conda` virtual environment to manage the project library dependencies.
